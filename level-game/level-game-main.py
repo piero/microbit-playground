@@ -1,5 +1,6 @@
 from microbit import *
 from random import randint
+import music
 
 
 def normalize(value, input_range, output_range) -> float:
@@ -43,6 +44,7 @@ while True:
 
     if x_pos == x_target and y_pos == y_target:
         # Win! Set a new target
+        music.play(music.BA_DING, wait=False)
         score += 1
         display.show(score)
         sleep(1000)
@@ -52,6 +54,7 @@ while True:
             y_target = randint(0, 4)
         else:
             # Restart the game
+            music.play(music.POWER_UP, wait=False)
             for _ in range(3):
                 animate_win()
             score = 0
