@@ -21,6 +21,7 @@ while True:
     normalized = int(normalize(sound_level, [0, 255], [0, 9]))
     image = Image(cross_images[normalized])
     display.show(image)
+    sleep(10)
     
 
 
