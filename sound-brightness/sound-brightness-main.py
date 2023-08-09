@@ -12,16 +12,24 @@ cross_images = ['00000:00100:01210:00100:00000',
                 '00900:09990:99999:09990:00900']
 
 def normalize(value, input_range, output_range) -> float:
-    return output_range[0] + ((output_range[1] - output_range[0]) / (input_range[0] - input_range[1])) * (value - input_range[0])
+    '''
+    Rescale x from its min/max range to a target range [a, b] using the formula:
+
+        a + (x - min(x)) * (b - a) / (max(x) - min(x))
+    '''
+    return output_range[0] + ((value - input_range[0]) * (output_range[1] - output_range[0])) / (input_range[0] - input_range[1])
 
 while True:
     sound_level = microphone.sound_level()
 
     # sound level is [0-255] but brightness is [0-9] => Normalize!
-    normalized = int(normalize(sound_level, [0, 255], [0, 9]))
+    normalized = int(abs(normalize(sound_level, [0, 255], [0, 9])))
+
+    #print('V: ', sound_level, ' => ', normalized)
+
     image = Image(cross_images[normalized])
     display.show(image)
-    sleep(10)
+    sleep(15)
     
 
 
