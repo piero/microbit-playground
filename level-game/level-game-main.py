@@ -8,20 +8,20 @@ def normalize(value, input_range, output_range) -> float:
     return output_range[0] + ((output_range[1] - output_range[0]) / (input_range[0] - input_range[1])) * (value - input_range[0])
 
 
-def animate_win():
-    display.show(Image('00000:00600:06960:00600:00000'))
-    sleep(50)
-    display.show(Image('00600:06960:69696:06960:00600'))
-    sleep(50)
-    display.show(Image('06960:69696:96069:69696:06960'))
-    sleep(50)
-    display.show(Image('69696:96069:60006:96069:69696'))
-    sleep(50)
-    display.show(Image('96069:60006:00000:60006:96069'))
-    sleep(50)
-    display.show(Image('60006:00000:00000:00000:60006'))
-    sleep(50)
+def animate(images):
+    for img in images:
+        display.show(Image(img))
+        sleep(50)
     display.clear()
+
+
+def initialize_game():
+    global score, x_target, y_target, start_at
+    music.play(music.JUMP_UP, wait=False)
+    animate(animation_start)
+    score = 0
+    x_target, y_target = set_target()
+    start_at = time.ticks_ms()
 
 
 def set_target():
@@ -32,14 +32,26 @@ def set_target():
         y_target = randint(0, 4)
     return x_target, y_target
 
-    
-# Initialise the game
-score = 0
-x_target, y_target = set_target()
-start_at = time.ticks_ms()
 
+animation_win = [
+    '00000:00600:06960:00600:00000',
+    '00600:06960:69696:06960:00600',
+    '06960:69696:96069:69696:06960',
+    '69696:96069:60006:96069:69696',
+    '96069:60006:00000:60006:96069',
+    '60006:00000:00000:00000:60006']
 
-while True:    
+animation_start = list(reversed(animation_win))
+
+# Initialize game variables with dummy values
+# and let initialize_game() do the rest.
+score, x_target, y_target, start_at = 0,0,0,0
+initialize_game()
+
+while True:
+    if button_a.was_pressed() or button_b.was_pressed():
+        initialize_game()
+
     x_acc, y_acc, _ = accelerometer.get_values()
 
     x_acc = min(max(x_acc, -500), 500)
@@ -58,17 +70,17 @@ while True:
         display.show(score)
         sleep(1000)
         if score < 9:
-            animate_win()
+            animate(animation_win)
             x_target, y_target = set_target()
         else:
             # Show the elapsed time and restart the game
             end_at = time.ticks_ms()
             music.play(music.POWER_UP, wait=False)
             for _ in range(3):
-                animate_win()            
+                animate(animation_win)
             elapsed_time = time.ticks_diff(end_at, start_at) // 1000
             display.scroll(str(elapsed_time) + ' sec')
-            score = 0
+            initialize_game()
 
     # Update the screen
     display.clear()
