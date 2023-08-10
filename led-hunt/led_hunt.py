@@ -85,7 +85,7 @@ while True:
         display.show(score)
         sleep(1000)
 
-        if score < 9:
+        if score <= 9:
             # End of match: set a new target
             animate(animation_win)
             x_target, y_target = set_target()
