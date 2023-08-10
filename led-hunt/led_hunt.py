@@ -1,3 +1,14 @@
+"""
+LED Hunt
+
+Author: Piero Cornice
+
+- Capture the faint LED with the bright one by tilting the device.
+- Do it 10 times to win the game.
+- See how quick you've been, to compete with friends.
+- Press either A or B to reset the game.
+"""
+
 from microbit import *
 from random import randint
 import music
@@ -5,13 +16,17 @@ import time
 
 
 def normalize(value, input_range, output_range) -> float:
-    return output_range[0] + ((output_range[1] - output_range[0]) / (input_range[0] - input_range[1])) * (value - input_range[0])
+    '''
+    Rescale x from its min/max range to a target range [a, b] using the formula:
 
+        a + (x - min(x)) * (b - a) / (max(x) - min(x))
+    '''
+    return output_range[0] + ((value - input_range[0]) * (output_range[1] - output_range[0])) / (input_range[0] - input_range[1])
 
-def animate(images):
+def animate(images, delay_ms=50):
     for img in images:
         display.show(Image(img))
-        sleep(50)
+        sleep(delay_ms)
     display.clear()
 
 
@@ -25,8 +40,8 @@ def initialize_game():
 
 
 def set_target():
-    '''Make sure the target is not in the center'''
     x_target, y_target = 2, 2
+    # make sure the target is not in the center, as we'll probably start from there
     while x_target == 2 and y_target == 2:
         x_target = randint(0, 4)
         y_target = randint(0, 4)
@@ -45,7 +60,7 @@ animation_start = list(reversed(animation_win))
 
 # Initialize game variables with dummy values
 # and let initialize_game() do the rest.
-score, x_target, y_target, start_at = 0,0,0,0
+score, x_target, y_target, start_at = 0, 0, 0, 0
 initialize_game()
 
 while True:
@@ -69,17 +84,20 @@ while True:
         score += 1
         display.show(score)
         sleep(1000)
+
         if score < 9:
+            # End of match: set a new target
             animate(animation_win)
             x_target, y_target = set_target()
         else:
+            # End of game
             # Show the elapsed time and restart the game
             end_at = time.ticks_ms()
             music.play(music.POWER_UP, wait=False)
             for _ in range(3):
                 animate(animation_win)
             elapsed_time = time.ticks_diff(end_at, start_at) // 1000
-            display.scroll(str(elapsed_time) + ' sec')
+            display.scroll(str(elapsed_time) + ' sec', delay=100)
             initialize_game()
 
     # Update the screen
@@ -87,3 +105,4 @@ while True:
     display.set_pixel(x_target, y_target, 5)
     display.set_pixel(x_pos, y_pos, 9)
     sleep(100)
+
