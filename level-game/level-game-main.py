@@ -1,6 +1,7 @@
 from microbit import *
 from random import randint
 import music
+import time
 
 
 def normalize(value, input_range, output_range) -> float:
@@ -23,11 +24,19 @@ def animate_win():
     display.clear()
 
 
+def set_target():
+    '''Make sure the target is not in the center'''
+    x_target, y_target = 2, 2
+    while x_target == 2 and y_target == 2:
+        x_target = randint(0, 4)
+        y_target = randint(0, 4)
+    return x_target, y_target
 
-# Set the initial target and initialise score
-x_target = randint(0, 4)
-y_target = randint(0, 4)
+    
+# Initialise the game
 score = 0
+x_target, y_target = set_target()
+start_at = time.ticks_ms()
 
 
 while True:    
@@ -50,15 +59,18 @@ while True:
         sleep(1000)
         if score < 9:
             animate_win()
-            x_target = randint(0, 4)
-            y_target = randint(0, 4)
+            x_target, y_target = set_target()
         else:
-            # Restart the game
+            # Show the elapsed time and restart the game
+            end_at = time.ticks_ms()
             music.play(music.POWER_UP, wait=False)
             for _ in range(3):
-                animate_win()
+                animate_win()            
+            elapsed_time = time.ticks_diff(end_at, start_at) // 1000
+            display.scroll(str(elapsed_time) + ' sec')
             score = 0
-    
+
+    # Update the screen
     display.clear()
     display.set_pixel(x_target, y_target, 5)
     display.set_pixel(x_pos, y_pos, 9)
